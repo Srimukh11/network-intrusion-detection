@@ -1,23 +1,36 @@
 import streamlit as st
-import joblib
+import pickle
 import numpy as np
 
-st.title("Heart Disease Prediction")
+# Load trained model and scaler
+model = pickle.load(open("rf_model.pkl", "rb"))
+scaler = pickle.load(open("scaler.pkl", "rb"))
 
-model = joblib.load("rf_model.pkl")
+st.set_page_config(page_title="Network Intrusion Detection System")
 
-age = st.number_input("Age", 1, 120)
-sex = st.selectbox("Sex (1=Male, 0=Female)", [0, 1])
-cp = st.number_input("Chest Pain Type (0–3)")
-trestbps = st.number_input("Resting Blood Pressure")
-chol = st.number_input("Cholesterol")
-thalach = st.number_input("Max Heart Rate")
+st.title("🔐 Network Intrusion Detection System")
+st.write("Detect whether the given network traffic is **Normal** or an **Attack**.")
 
-# IMPORTANT: order must match training
-features = np.array([[age, sex, cp, trestbps, chol, thalach]])
+st.divider()
 
-if st.button("Predict"):
-    prediction = model.predict(features)[0]
-    st.success(
-        "Heart Disease Detected ❤️" if prediction == 1 else "No Heart Disease 💚"
-    )
+# ---- INPUT FIELDS ----
+duration = st.number_input("Duration", min_value=0)
+src_bytes = st.number_input("Source Bytes", min_value=0)
+dst_bytes = st.number_input("Destination Bytes", min_value=0)
+num_failed_logins = st.number_input("Failed Login Attempts", min_value=0)
+num_compromised = st.number_input("Compromised Conditions", min_value=0)
+count = st.number_input("Connections (last 2 seconds)", min_value=0)
+srv_count = st.number_input("Same Service Connections", min_value=0)
+
+if st.button("🚨 Detect Intrusion"):
+    input_data = np.array([[duration, src_bytes, dst_bytes,
+                            num_failed_logins, num_compromised,
+                            count, srv_count]])
+
+    input_scaled = scaler.transform(input_data)
+    prediction = model.predict(input_scaled)
+
+    if prediction[0] == "attack":
+        st.error("⚠️ Intrusion Detected!")
+    else:
+        st.success("✅ Normal Network Traffic")
