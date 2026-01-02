@@ -4,7 +4,7 @@ import numpy as np
 
 st.title("Heart Disease Prediction")
 
-model = joblib.load("model.pkl")
+model = joblib.load("rf_model.pkl")
 
 age = st.number_input("Age", 1, 120)
 sex = st.selectbox("Sex (1=Male, 0=Female)", [0, 1])
